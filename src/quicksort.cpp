@@ -6,6 +6,27 @@
 // around a pivot and returns the pivot index
 int partition(std::vector<int>& data, int low, int high) {
   // your code here
+	int pivot = data[high];
+	int i = low - 1;
+	int temp;
+	for (int j = low; j < high ; j++)
+	{
+		if (data[j] < pivot)
+		{
+			i++;
+			temp = data[i];
+			data[i] = data[j];
+			data[j] = temp;
+		}
+	}
+	if (data[high] < data[i + 1])
+	{
+		temp = data[i + 1];
+		data[i + 1] = data[high];
+		data[high] = temp;
+	}
+
+	return i + 1;
 }
 
 // sorts elements low through high (inclusive) using a single thread
@@ -16,6 +37,13 @@ void quicksort(std::vector<int>& data, int low, int high) {
 // sorts elements low through high (inclusive) using multiple threads
 void parallel_quicksort(std::vector<int>& data, int low, int high) {
   // your code here
+	int pivot;
+	if (low < high)
+	{
+		pivot = partition(data, low, high);
+		quicksort(data, low, pivot - 1);
+		quicksort(data, pivot + 1, high);
+	}
 }
 
 int main() {
@@ -33,7 +61,7 @@ int main() {
   quicksort(v1, 0, v1.size()-1);
 
   // sort v2 using parallel algorithm
-  parallel_quicksort(v2, 0, v2.size()-1);
+  //parallel_quicksort(v2, 0, v2.size()-1);
 
   return 0;
 }
