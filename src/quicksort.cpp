@@ -49,8 +49,10 @@ void parallel_quicksort(std::vector<int>& data, int low, int high) {
 	if (low < high)
 	{
 		pivot = partition(data, low, high);
-		std::thread t1(&quicksort, data, low, pivot - 1);
-		std::thread t2(&quicksort, data, pivot + 1, high);
+		std::thread t1(&quicksort, std::ref(data), low, pivot - 1);
+		std::thread t2(&quicksort, std::ref(data), pivot + 1, high);
+		t1.join();
+		t2.join();
 	}
 
 }
@@ -72,7 +74,7 @@ int main() {
  // sort v2 using parallel algorithm
   parallel_quicksort(v2, 0, v2.size() - 1);
 
-
+  /*
   for (int j = 0; j < VECTOR_SIZE-1; ++j)
   {
 	  std::cout << v2[j] << std::endl;
@@ -83,6 +85,6 @@ int main() {
 	  }
 
   }
-
+  */
   return 0;
 }
