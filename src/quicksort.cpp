@@ -49,8 +49,8 @@ void parallel_quicksort(std::vector<int>& data, int low, int high) {
 	if (low < high)
 	{
 		pivot = partition(data, low, high);
-		std::thread t1(&parallel_quicksort, std::ref(data), low, pivot - 1);
-		std::thread t2(&parallel_quicksort, std::ref(data), pivot + 1, high);
+		std::thread t1(&parallel_quicksort, std::ref(data),std::ref(low), std::ref(pivot) - 1);
+		std::thread t2(&parallel_quicksort, std::ref(data), std::ref( pivot) + 1, std::ref( high));
 		t1.join();
 		t2.join();
 
@@ -70,29 +70,32 @@ int main() {
   }
   std::vector<int> v2 = v1;  // copy all contents
 
+  /*
   auto t1 = std::chrono::high_resolution_clock::now();
   // sort v1 using sequential algorithm
   quicksort(v1, 0, v1.size()-1);
   auto t2 = std::chrono::high_resolution_clock::now();
 
-  auto duration1 = t1 - t2;
+  auto duration1 = t2 - t1;
   //change duration to seconds
   auto duration_s1 = std::chrono::duration_cast<std::chrono::seconds>(duration1);
   long s1 = duration_s1.count();
-
+  
 
   auto t3 = std::chrono::high_resolution_clock::now();
  // sort v2 using parallel algorithm
-  parallel_quicksort(v2, 0, v2.size() - 1);
+  
   auto t4 = std::chrono::high_resolution_clock::now();
 
-  auto duration2 = t1 - t2;
+  auto duration2 = t4 - t3;
   //change duration to seconds
   auto duration_s2 = std::chrono::duration_cast<std::chrono::seconds>(duration2);
   long s2 = duration_s2.count();
  
 
-  std::cout << "duration1:" << s1 << " duration2:" << s2 << std::endl;
+  std::cout << " duration2:" << s2 << std::endl;
+  */
+  parallel_quicksort(v2, 0, v2.size() - 1);
 
 
   /*
