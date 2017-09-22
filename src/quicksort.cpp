@@ -49,16 +49,20 @@ void parallel_quicksort(std::vector<int>& data, int low, int high) {
 	if (low < high)
 	{
 		pivot = partition(data, low, high);
-		std::thread t1(&quicksort, data, low, pivot - 1);
-		std::thread t2(&quicksort, data, pivot + 1, high);
+		std::thread t1(&parallel_quicksort, std::ref(data),std::ref(low), std::ref(pivot) - 1);
+		std::thread t2(&parallel_quicksort, std::ref(data), std::ref(pivot)+ 1, std::ref(high));
+		t1.join();
+		t2.join();
+
 	}
+
 
 }
 
 int main() {
 
   // create two copies of random data
-  const int VECTOR_SIZE = 1000000;
+  const int VECTOR_SIZE = 100;
   std::vector<int> v1(VECTOR_SIZE, 0);
   // fill with random integers
   for (int i=0; i<VECTOR_SIZE; ++i) {
