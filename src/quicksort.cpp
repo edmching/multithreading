@@ -84,7 +84,7 @@ int main() {
 
   auto t3 = std::chrono::high_resolution_clock::now();
  // sort v2 using parallel algorithm
-  
+   parallel_quicksort(v2, 0, v2.size() - 1);
   auto t4 = std::chrono::high_resolution_clock::now();
 
   auto duration2 = t4 - t3;
@@ -95,7 +95,7 @@ int main() {
 
   std::cout << " duration2:" << s2 << std::endl;
   */
-  parallel_quicksort(v2, 0, v2.size() - 1);
+
 
 
   /*
