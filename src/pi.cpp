@@ -11,7 +11,7 @@ double estimate_pi(int nsamples) {
   int hit = 0;
   double x, y;
 
-  std::default_random_engine rnd(std::chrono::system_clock::now().time_since_epoch().count());
+  std::default_random_engine rnd;
   std::uniform_real_distribution<double> dist1(-1.0, 1.0);
   std::uniform_real_distribution<double> dist2(-1.0, 1.0);
   for (int i = 0; i < nsamples; ++i)
@@ -33,12 +33,19 @@ double estimate_pi(int nsamples) {
 // to true if within the unit circle
 void pi_sampler(std::vector<bool>& hits, int idx) {
 	
-
+  double x, y;
   // single instance of random engine and distribution
   static std::default_random_engine rnd;
   static std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
   // YOUR CODE HERE
+
+
+  x = dist(rnd);
+  y = dist(rnd);
+  if (x*x + y*y <= 1.000)
+	  hits[idx] = true;
+
 
 }
 
@@ -73,11 +80,20 @@ double estimate_pi_multithread_naive(int nsamples) {
 // count number of hits using nsamples, populates hits[idx]
 void pi_hits(std::vector<int>& hits, int idx, int nsamples) {
 
+  double x, y;
   // single instance of random engine and distribution
   static std::default_random_engine rnd;
   static std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
   // YOUR CODE HERE
+  for (int i = 0; i < nsamples; ++i)
+  {
+	  x = dist(rnd);
+	  y = dist(rnd);
+	  if (x*x + y*y <= 1.000)
+		  hits[idx]++;
+
+  }
 
 }
 
@@ -119,7 +135,9 @@ double estimate_pi_multithread(int nsamples) {
 
 int main() {
 
-  double pi = estimate_pi(10000000);
+  //double pi = estimate_pi(1000);
+  //double pi = estimate_pi_multithread_naive(1000);
+	double pi = estimate_pi_multithread(100000000);
   std::cout << "My estimate of PI is: " << pi << std::endl;
 
   return 0;
@@ -128,5 +146,7 @@ int main() {
 /*
 1000 SAMPLES accurate to 1 decimal places
 ~10mil samples for it to be accurate to 3 decimal places
+
+method 2 is slower because it takes longer to create a thread
 
 */
