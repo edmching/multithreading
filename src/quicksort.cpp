@@ -46,14 +46,14 @@ void quicksort(std::vector<int>& data, int low, int high) {
 void parallel_quicksort(std::vector<int>& data, int low, int high) {
   // your code here
 	int pivot;
-	if (low < high)
-	{
-		pivot = partition(data, low, high);
-		std::thread t1(&quicksort, std::ref(data), low, pivot - 1);
-		std::thread t2(&quicksort, std::ref(data), pivot + 1, high);
-		t1.join();
-		t2.join();
-	}
+
+	pivot = partition(data, low, high);
+
+	std::thread t1(&quicksort, std::ref(data), low, pivot - 1);
+	//quicksort(data, pivot + 1, high);
+	std::thread t2(&quicksort, std::ref(data), pivot + 1, high);
+	t1.join();
+	t2.join();
 
 }
 
@@ -102,11 +102,13 @@ int main() {
 	  std::cout << v2[j] << std::endl;
 	  if (v2[j] > v2[j + 1])
 	  {
+		  std::cout << v2[j + 1] << std::endl;
 		  std::cout << "the vector is not sorted" << std::endl;
 		  break;
 	  }
 
   }
   */
+  
   return 0;
 }
