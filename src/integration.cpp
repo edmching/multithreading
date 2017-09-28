@@ -133,7 +133,7 @@ void integrate_hits(Function& fn, std::vector<double>& hits, int idx, int nsampl
 double multithreaded_integrate(Function& fn, int nsamples)
 {
 	//number of available cores
-	int nthreads = 0.5*std::thread::hardware_concurrency();
+	int nthreads = std::thread::hardware_concurrency();
 	
 	std::vector<double> hits(nthreads, 0);
 
@@ -141,9 +141,9 @@ double multithreaded_integrate(Function& fn, int nsamples)
 	int msamples = 0;
 	for (int i = 0; i < nthreads-1; ++i) {
 		threads.push_back(
-			std::thread(integrate_hits,std::ref(fn),std::ref(hits), nthreads - 1, nsamples - msamples)
+			std::thread(integrate_hits,std::ref(fn),std::ref(hits), i, nsamples/nthreads)
 		);
-		msamples += nsamples / nthreads;
+		msamples += nsamples/nthreads;
 	}
 
 	threads.push_back(
@@ -160,7 +160,7 @@ double multithreaded_integrate(Function& fn, int nsamples)
 		vol += hits[i];
 	}
 
-	vol *= vsphere / nsamples;
+	vol *= vsphere /nsamples;
 
 	return vol;
 
@@ -185,6 +185,48 @@ int main() {
   std::cout << "integral of simple density " << mass << std::endl;
   std::cout << "centre of mass of simple density: (" << cx << "," << cy << "," << cz << ")" << std::endl;
 
+
+  // Density1 Objects
+  Density1 d1;
+  XFunction xd1(d1);  // x*d1(x,y,z)
+  YFunction yd1(d1);  // y*d1(x,y,z)
+  ZFunction zd1(d1);  // z*d1(x,y,z)
+
+  mass = multithreaded_integrate(d1, sample);
+  cx = multithreaded_integrate(xd1, sample) / mass;
+  cy = multithreaded_integrate(yd1, sample) / mass;
+  cz = multithreaded_integrate(zd1, sample) / mass;
+  std::cout << "integral of density1: " << mass << std::endl;
+  std::cout << "centre of mass of density1: (" << cx << "," << cy << "," << cz << ")" << std::endl;
+
+  //Density2 Objects
+  Density2 d2;
+  XFunction xd2(d2);
+  YFunction yd2(d2);
+  ZFunction zd2(d2);
+
+  mass = multithreaded_integrate(d2, sample);
+  cx = multithreaded_integrate(xd2, sample) / mass;
+  cy = multithreaded_integrate(yd2, sample) / mass;
+  cz = multithreaded_integrate(zd2, sample) / mass;
+  std::cout << "integral of density 2: " << mass << std::endl;
+  std::cout << "centre of mass of density 2: (" << cx << "," << cy << "," << cz << ")" << std::endl;
+
+  //Density3 Objects
+  Density3 d3;
+  XFunction xd3(d3);
+  YFunction yd3(d3);
+  ZFunction zd3(d3);
+
+  mass = multithreaded_integrate(d3, sample);
+  cx = multithreaded_integrate(xd3, sample) / mass;
+  cy = multithreaded_integrate(yd3, sample) / mass;
+  cz = multithreaded_integrate(zd3, sample) / mass;
+  std::cout << "integral of density 3: " << mass << std::endl;
+  std::cout << "centre of mass of density 3: (" << cx << "," << cy << "," << cz << ")" << std::endl;
+
+
+  /*
   //Simple_Density Objects
   Simple_Density sd;
   XFunction xsd(sd);
@@ -237,7 +279,7 @@ int main() {
   cz = integrate(zd3, sample) / mass;
   std::cout << "integral of density 3: " << mass << std::endl;
   std::cout << "centre of mass of density 3: (" << cx << "," << cy << "," << cz << ")" << std::endl;
-	
+*/
 
   return 0;
 }
