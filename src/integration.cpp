@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include <iostream>
 #include <random>
 #include <thread>
@@ -11,7 +13,7 @@ struct Point {
 // virtual base class for functions
 class Function {
  public:
-  virtual double operator()(double x, double y, double z) = 0;
+  virtual double operator(double x, double y, double z) = 0;
 };
 
 // computes x*fn(x,y,z)
@@ -44,9 +46,38 @@ class ZFunction : public Function {
   }
 };
 
+double integrate(Function& fn, int nsampler)
+{
+	double vol;
+	double vsphere = 4 / 3 * M_PI;
+	int hit = 0;
+	Point p1;
+
+	
+
+	std::default_random_engine rnd;
+	std::uniform_real_distribution<double> dist(-1,1);
+
+	for (int i = 0; i < nsampler; ++i)
+	{
+		p1.x = dist(rnd);
+		p1.y = dist(rnd);
+		p1.z = dist(rnd);
+
+		if (p1.x*p1.x + p1.y*p1.y + p1.z*p1.z <= 1.0)
+		{
+			hit++;
+			vol = vsphere*fn.operator(p1.x,p1.y,p1.z);
+		}
+
+	}
+
+}
+
 int main() {
 
   // YOUR CODE HERE
+	
 
   return 0;
 }
