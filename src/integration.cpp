@@ -91,7 +91,8 @@ double integrate(Function& fn, int nsampler)
 	double vsphere = 4 / 3 * M_PI;
 	Point p1;
 
-	std::default_random_engine rnd;
+	std::default_random_engine rnd(
+		std::chrono::system_clock::now().time_since_epoch().count());
 	std::uniform_real_distribution<double> dist(-1,1);
 
 	for (int i = 0; i < nsampler; ++i)
@@ -102,24 +103,87 @@ double integrate(Function& fn, int nsampler)
 
 		if (p1.x*p1.x + p1.y*p1.y + p1.z*p1.z <= 1.0)
 			vol += fn.eval(p1.x, p1.y, p1.z);
-		else
-			nsampler++;
+
 	}
 	
 	vol *= vsphere/nsampler;
 
 	return vol;
 }
-
-double multi_threaded_integrate(Function& fn, int nsampler)
+void integrate_hits(Function& fn, std::vector<double>& hits, int idx, int nsamples)
 {
+	Point p1;
+
+	std::default_random_engine rnd(
+		std::chrono::system_clock::now().time_since_epoch().count());
+	std::uniform_real_distribution<double> dist(-1, 1);
+
+	for (int i = 0; i < nsamples; ++i)
+	{
+		p1.x = dist(rnd);
+		p1.y = dist(rnd);
+		p1.z = dist(rnd);
+
+		if (p1.x*p1.x + p1.y*p1.y + p1.z*p1.z <= 1)
+			hits[idx] += fn.eval(p1.x, p1.y, p1.z);
+
+	}
+}
+
+double multithreaded_integrate(Function& fn, int nsamples)
+{
+	//number of available cores
+	int nthreads = 0.5*std::thread::hardware_concurrency();
+	
+	std::vector<double> hits(nthreads, 0);
+
+	std::vector<std::thread> threads;
+	int msamples = 0;
+	for (int i = 0; i < nthreads-1; ++i) {
+		threads.push_back(
+			std::thread(integrate_hits,std::ref(fn),std::ref(hits), nthreads - 1, nsamples - msamples)
+		);
+		msamples += nsamples / nthreads;
+	}
+
+	threads.push_back(
+		std::thread(integrate_hits,std::ref(fn), std::ref(hits), nthreads - 1, nsamples - msamples)
+	);
+
+	for (int i = 0; i < nthreads; ++i) {
+		threads[i].join();
+	}
+
+	double vol = 0;
+	double vsphere = 4 / 3 * M_PI;
+	for (int i = 0; i < nthreads; ++i) {
+		vol += hits[i];
+	}
+
+	vol *= vsphere / nsamples;
+
+	return vol;
 
 }
 
 int main() {
   
   double cx, cy, cz, mass;
-  int sample = 10000;
+  int msample = 1000000;
+  int sample = 1000000;
+
+  //Simple_Density Objects
+  Simple_Density msd;
+  XFunction xmsd(msd);
+  YFunction ymsd(msd);
+  ZFunction zmsd(msd);
+
+  mass = multithreaded_integrate(msd, msample);
+  cx = multithreaded_integrate(xmsd, msample) / mass;
+  cy = multithreaded_integrate(ymsd, msample) / mass;
+  cz = multithreaded_integrate(zmsd, msample) / mass;
+  std::cout << "integral of simple density " << mass << std::endl;
+  std::cout << "centre of mass of simple density: (" << cx << "," << cy << "," << cz << ")" << std::endl;
 
   //Simple_Density Objects
   Simple_Density sd;
@@ -173,14 +237,6 @@ int main() {
   cz = integrate(zd3, sample) / mass;
   std::cout << "integral of density 3: " << mass << std::endl;
   std::cout << "centre of mass of density 3: (" << cx << "," << cy << "," << cz << ")" << std::endl;
-
-
-  //std::cout << "xd1.eval(0.1,0.2,0.3): " << xd1.eval(0.1,0.2,0.3) << std::endl;
-  //std::cout << "yd1.eval(0.1,0.2,0.3): " << yd1.eval(0.1,0.2,0.3) << std::endl;
-  //std::cout << "zd1.eval(0.1,0.2,0.3): " << zd1.eval(0.1,0.2,0.3) << std::endl;
- 
-
-  // YOUR CODE HERE
 	
 
   return 0;
